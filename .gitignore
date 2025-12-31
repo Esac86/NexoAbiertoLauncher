@@ -1,6 +1,10 @@
 .env
 *.env
+dist/
+build/
+Nexo Abierto Launcher.spec
 __pycache__/
+
 **/__pycache__/
 venv/
 env/
