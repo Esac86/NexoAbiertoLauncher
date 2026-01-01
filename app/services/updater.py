@@ -6,7 +6,7 @@ import tempfile
 from packaging import version
 from app.utils.helpers import resource_path
 
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "1.0.1"
 REPO_OWNER = "Esac86"
 REPO_NAME = "NexoAbiertoLauncher"
 GITHUB_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/releases/latest"
