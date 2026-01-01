@@ -5,9 +5,12 @@ import webbrowser
 import ctypes
 import os
 import gc
+import threading
 from app.services.config import load_config, save_config
 from app.services.versions import VersionService
 from app.services.minecraft import PlayService
+from app.services.updater import UpdateService, CURRENT_VERSION
+from app.ui.auto_update_dialog import AutoUpdateDialog
 from app.utils.helpers import resource_path
 
 PRIMARIO = "#FF55FF"
@@ -51,7 +54,7 @@ class VersionComboBox(ctk.CTkComboBox):
 class Launcher(ctk.CTk):
     def __init__(self, play_callback):
         super().__init__()
-        self.title(APP_NAME)
+        self.title(f"{APP_NAME} v{CURRENT_VERSION}")
         self.geometry("850x550")
         self.resizable(False, False)
         self.configure(fg_color="#020617")
@@ -63,6 +66,9 @@ class Launcher(ctk.CTk):
         self._setup_ui()
         self._center_window()
         self._load_config()
+        
+        self._check_updates()
+        
         gc.collect()
 
     def _set_taskbar_icon(self, ico_path):
@@ -109,7 +115,7 @@ class Launcher(ctk.CTk):
 
         right_frame = ctk.CTkFrame(card, fg_color="transparent")
         right_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
-        right_frame.grid_rowconfigure((0, 6), weight=1)
+        right_frame.grid_rowconfigure((0, 7), weight=1)
 
         self.user = ctk.CTkEntry(right_frame, placeholder_text="Nombre de usuario",
                                  height=50, width=320, corner_radius=16, fg_color="#0b1220",
@@ -134,6 +140,10 @@ class Launcher(ctk.CTk):
                                       fg_color=PRIMARIO, hover_color=SECUNDARIO,
                                       command=self._on_play_click)
         self.play_btn.grid(row=5, column=0, pady=10)
+        
+        version_label = ctk.CTkLabel(right_frame, text=f"Launcher v{CURRENT_VERSION}",
+                                     font=("Segoe UI", 10), text_color="#555555")
+        version_label.grid(row=6, column=0, pady=(5, 0))
 
     def _load_config(self):
         cfg = load_config()
@@ -142,6 +152,17 @@ class Launcher(ctk.CTk):
         if cfg.get("version") and cfg["version"] in self.combo.versions:
             self.combo.set(cfg["version"])
         self.check_version_installed()
+
+    def _check_updates(self):
+        def check():
+            update_info = UpdateService.check_for_updates()
+            if update_info:
+                self.after(500, lambda: self._show_update_dialog(update_info))
+        
+        threading.Thread(target=check, daemon=True).start()
+
+    def _show_update_dialog(self, update_info):
+        AutoUpdateDialog(self, update_info, UpdateService)
 
     def _on_play_click(self):
         username = self.user.get().strip()
@@ -155,7 +176,7 @@ class Launcher(ctk.CTk):
         if self.combo.is_selected_installed():
             self.play_btn.configure(text="▶ JUGAR")
         else:
-            self.play_btn.configure(text="📥 INSTALAR")
+            self.play_btn.configure(text="🔥 INSTALAR")
 
     def update_button_state(self, state, current=0, total=0, message=None):
         if state == "installing":
