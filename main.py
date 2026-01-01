@@ -1,7 +1,9 @@
 from app.ui.launcher_ui import Launcher
-from app.services.minecraft import PlayService
+from app.services.discord_rpc import DiscordRPC
 
-def onPlay(username, version):
+discord_rpc = DiscordRPC()
+
+def onPlay():
     pass
 
 if __name__ == "__main__":

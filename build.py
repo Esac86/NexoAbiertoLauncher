@@ -3,7 +3,7 @@ import os
 import shutil
 import stat
 
-def force_remove(func, path, exc_info):
+def force_remove(func, path):
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
@@ -18,6 +18,7 @@ PyInstaller.__main__.run([
     "--windowed",                  
     "--icon=img/favicon.ico",
     "--add-data=img/favicon.ico;img", 
+    "--add-data=.env;.",  
     "--clean",
     "--noconfirm",
 ])
